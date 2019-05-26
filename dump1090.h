@@ -223,6 +223,7 @@ struct aircraft {
     uint64_t      odd_cprtime;
     uint64_t      even_cprtime;
     double        lat, lon;       // Coordinated obtained from CPR encoded data
+    double        distance;       // Distance from viewer
     int           bFlags;         // Flags related to valid fields in this structure
     struct aircraft *next;        // Next aircraft in our linked list
 };
@@ -318,6 +319,7 @@ struct {                             // Internal state
     int   metric;                    // Use metric units
     int   mlat;                      // Use Beast ascii format for raw data output, i.e. @...; iso *...;
     int   interactive_rtl1090;       // flight table in interactive mode is formatted like RTL1090
+    int   interactive_withdistance;  // flight table in interactive mode with distance
 
     // User details
     double fUserLat;                // Users receiver/antenna lat/lon needed for initial surface location

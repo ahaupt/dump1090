@@ -29,6 +29,7 @@
 //
 
 #include "dump1090.h"
+#include "distance.h"
 //
 // ============================= Utility functions ==========================
 //
@@ -372,6 +373,7 @@ struct aircraft *interactiveReceiveData(struct modesMessage *mm) {
             mm->bFlags |= MODES_ACFLAGS_LATLON_VALID;
             mm->fLat    = a->lat;
             mm->fLon    = a->lon;
+            a->distance = distance(a->lat, a->lon, Modes.fUserLat, Modes.fUserLon, Modes.metric ? 'K' : 'N');
         }
     }
 
@@ -434,9 +436,12 @@ void interactiveShowData(void) {
     cls();
 #endif
 
-    if (Modes.interactive_rtl1090 == 0) {
+    if (Modes.interactive_rtl1090 == 0 && Modes.interactive_withdistance == 0) {
         printf (
 "Hex     Mode  Sqwk  Flight   Alt    Spd  Hdg    Lat      Long   Sig  Msgs   Ti%c\n", progress);
+    } else if (Modes.interactive_withdistance == 1) {
+        printf (
+"Hex     Mode  Sqwk  Flight   Alt    Spd  Lat      Long    Dist   Sig  Msgs   Ti%c\n", progress);
     } else {
         printf (
 "Hex    Flight   Alt      V/S GS  TT  SSR  G*456^ Msgs    Seen %c\n", progress);
@@ -491,6 +496,7 @@ void interactiveShowData(void) {
                     char strMode[5]               = "    ";
                     char strLat[8]                = " ";
                     char strLon[9]                = " ";
+                    char strDist[8]               = " ";
                     unsigned char * pSig       = a->signalLevel;
                     unsigned int signalAverage = (pSig[0] + pSig[1] + pSig[2] + pSig[3] + 
                                                   pSig[4] + pSig[5] + pSig[6] + pSig[7] + 3) >> 3; 
@@ -506,6 +512,7 @@ void interactiveShowData(void) {
                     if (a->bFlags & MODES_ACFLAGS_LATLON_VALID) {
                         snprintf(strLat, 8,"%7.03f", a->lat);
                         snprintf(strLon, 9,"%8.03f", a->lon);
+                        snprintf(strDist, 7,"%6.01f", a->distance);
                     }
 
                     if (a->bFlags & MODES_ACFLAGS_AOG) {
@@ -514,9 +521,16 @@ void interactiveShowData(void) {
                         snprintf(strFl, 6, "%5d", altitude);
                     }
 
-                    printf("%06X  %-4s  %-4s  %-8s %5s  %3s  %3s  %7s %8s  %3d %5d   %2d\n",
-                    a->addr, strMode, strSquawk, a->flight, strFl, strGs, strTt,
-                    strLat, strLon, signalAverage, msgs, (int)(now - a->seen));
+                    if (Modes.interactive_withdistance == 0) {
+                        printf("%06X  %-4s  %-4s  %-8s %5s  %3s  %3s  %7s %8s  %3d %5d   %2d\n",
+                        a->addr, strMode, strSquawk, a->flight, strFl, strGs, strTt,
+                        strLat, strLon, signalAverage, msgs, (int)(now - a->seen));
+                    } else {
+
+                        printf("%06X  %-4s  %-4s  %-8s %5s  %3s %7s %8s %6s %4d %5d   %2d\n",
+                        a->addr, strMode, strSquawk, a->flight, strFl, strGs,
+                        strLat, strLon, strDist, signalAverage, msgs, (int)(now - a->seen));
+                    }
                 }
                 count++;
             }

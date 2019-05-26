@@ -250,6 +250,9 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--interactive-rtl1090")) {
             Modes.interactive = 1;
             Modes.interactive_rtl1090 = 1;
+        } else if (!strcmp(argv[j],"--interactive-withdistance")) {
+            Modes.interactive = 1;
+            Modes.interactive_withdistance = 1;
         } else if (!strcmp(argv[j],"--lat") && more) {
             Modes.fUserLat = atof(argv[++j]);
         } else if (!strcmp(argv[j],"--lon") && more) {
